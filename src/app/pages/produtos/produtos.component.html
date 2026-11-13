@@ -1,0 +1,284 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <h1 class="page-title">Catálogo de Produtos</h1>
+      <p class="page-subtitle">Cadastre novos produtos, gerencie unidades de medida e status do catálogo</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" (click)="abrirModalNovo()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Novo Produto</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Total de Itens</span>
+        <span class="stat-value">{{ totalElements() }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background-color: var(--color-success-bg); color: var(--color-success);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Produtos Ativos</span>
+        <span class="stat-value">{{ ativosCount() }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background-color: var(--color-danger-bg); color: var(--color-danger);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Produtos Inativos</span>
+        <span class="stat-value">{{ inativosCount() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Listagem Geral</h2>
+      <button class="btn btn-secondary btn-sm" (click)="carregarProdutos()" [disabled]="loading()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Atualizar</span>
+      </button>
+    </div>
+
+    <div class="card-body">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Pesquisar por nome de produto..." 
+            [(ngModel)]="buscaNome"
+            (keyup.enter)="executarBuscaNome()">
+        </div>
+
+        <!-- Filter by Categoria Dropdown -->
+        <div class="filter-select-wrap">
+          <select class="form-select" [(ngModel)]="categoriaFiltroSelecionada" (change)="filtrarPorCategoria()">
+            <option value="">Todas as Categorias</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [value]="cat.nome">{{ cat.nome }}</option>
+            }
+          </select>
+        </div>
+
+        <button class="btn btn-secondary" (click)="executarBuscaNome()">Buscar</button>
+        @if (buscaAtiva()) {
+          <button class="btn btn-outline" (click)="limparFiltros()">Limpar</button>
+        }
+      </div>
+
+      <!-- Loading or Table -->
+      @if (loading()) {
+        <div class="empty-state">
+          <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px; border-color: var(--brown-300); border-top-color: var(--primary-accent);"></div>
+          <p>Carregando produtos...</p>
+        </div>
+      } @else if (produtos().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">📦</div>
+          <h3 class="empty-title">Nenhum produto cadastrado</h3>
+          <p>Clique em "Novo Produto" para adicionar itens ao catálogo.</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome do Produto</th>
+                <th>Categoria</th>
+                <th>Un. Medida</th>
+                <th>Saldo Estoque</th>
+                <th>Status</th>
+                <th style="text-align: right;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (prod of produtos(); track prod.id) {
+                <tr>
+                  <td>#{{ prod.id }}</td>
+                  <td>
+                    <strong>{{ prod.nome }}</strong>
+                  </td>
+                  <td>
+                    <span class="category-pill">{{ prod.categoriaNome || 'Geral' }}</span>
+                  </td>
+                  <td><code>{{ prod.unidadeMedida }}</code></td>
+                  <td>
+                    <strong>{{ prod.estoqueQuantidade ?? 0 }}</strong>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="prod.statusProduto === 'ATIVO' ? 'badge-active' : 'badge-inactive'">
+                      {{ prod.statusProduto }}
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <div class="action-buttons-group">
+                      <!-- Inativar / Ativar -->
+                      @if (prod.statusProduto === 'ATIVO') {
+                        <button 
+                          type="button" 
+                          class="btn btn-sm btn-danger-outline" 
+                          (click)="inativarProduto(prod)"
+                          title="Inativar Produto">
+                          Inativar
+                        </button>
+                      } @else {
+                        <button 
+                          type="button" 
+                          class="btn btn-sm btn-outline" 
+                          (click)="ativarProduto(prod)"
+                          title="Ativar Produto">
+                          Ativar
+                        </button>
+                      }
+
+                      <!-- Excluir -->
+                      <button 
+                        type="button" 
+                        class="btn btn-sm btn-danger-outline btn-icon" 
+                        (click)="excluirProduto(prod)"
+                        title="Excluir Produto">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-footer">
+          <span>Página {{ paginaAtual() + 1 }} de {{ totalPaginas() }} ({{ totalElements() }} produtos)</span>
+          <div class="pagination-controls">
+            <button 
+              class="btn btn-secondary btn-sm" 
+              [disabled]="paginaAtual() === 0" 
+              (click)="mudarPagina(paginaAtual() - 1)">
+              Anterior
+            </button>
+            <button 
+              class="btn btn-secondary btn-sm" 
+              [disabled]="paginaAtual() >= totalPaginas() - 1" 
+              (click)="mudarPagina(paginaAtual() + 1)">
+              Próxima
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Produto -->
+@if (modalNovoAberto()) {
+  <div class="modal-overlay" (click)="fecharModalNovo()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Cadastrar Novo Produto</h3>
+        <button class="modal-close" (click)="fecharModalNovo()">&times;</button>
+      </div>
+      <form [formGroup]="novoProdutoForm" (ngSubmit)="salvarNovoProduto()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Nome do Produto <span class="required">*</span></label>
+            <input 
+              type="text" 
+              class="form-control" 
+              formControlName="nome" 
+              placeholder="Ex: Teclado Mecânico RGB">
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Categoria <span class="required">*</span></label>
+              <select class="form-select" formControlName="categoriaId">
+                <option [ngValue]="null" disabled>Selecione uma categoria...</option>
+                @for (cat of categorias(); track cat.id) {
+                  <option [ngValue]="cat.id">{{ cat.nome }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Unidade de Medida <span class="required">*</span></label>
+              <select class="form-select" formControlName="unidadeMedida">
+                <option value="UN">UN (Unidade)</option>
+                <option value="CX">CX (Caixa)</option>
+                <option value="KG">KG (Quilograma)</option>
+                <option value="LT">LT (Litro)</option>
+                <option value="MT">MT (Metro)</option>
+                <option value="PCT">PCT (Pacote)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quantidade Inicial de Estoque <span class="required">*</span></label>
+            <input 
+              type="number" 
+              class="form-control" 
+              min="1" 
+              formControlName="quantidade" 
+              placeholder="Ex: 50">
+            <span class="form-hint">O backend criará o registro de estoque inicial com essa quantidade informada.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="fecharModalNovo()">Cancelar</button>
+          <button 
+            type="submit" 
+            class="btn btn-primary" 
+            [disabled]="salvando() || novoProdutoForm.invalid">
+            {{ salvando() ? 'Cadastrando...' : 'Cadastrar Produto' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

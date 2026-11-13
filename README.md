@@ -1,59 +1,88 @@
-# FrontEstoque
+# 📦 EstoKit - Sistema de Gestão de Estoque
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.7.
+Aplicação Front-End desenvolvida em **Angular 22** para gerenciamento corporativo de estoques, movimentações, catálogo de produtos, fornecedores, ordens de compra e quadro de funcionários.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🎨 Identidade Visual e Experiência
 
+- **Paleta de Cores:**
+  - **Primária:** Branco (`#FFFFFF`, superfícies limpas e canvas suave)
+  - **Secundária:** Tons de Marrom (`#62361E`, `#78482A`, `#4B2714`, degradê elegante)
+- **Modo Escuro (Dark Mode):** Alternância instantânea via botão no cabeçalho com persistência em `localStorage`. Paleta com tons de café espresso e bronze escuro de alto contraste.
+- **Tipografia:** Fonte **Inter** em toda a aplicação (Google Fonts).
+- **Idioma:** Totalmente em **Português do Brasil (PT-BR)**.
+
+---
+
+## 🧭 Estrutura de Layout Persistente
+
+O cabeçalho (`Navbar`) e o rodapé (`Footer`) permanecem **persistentes** durante toda a navegação:
+
+- **Navbar (`EstoKit`):**
+  - Logotipo e identidade da marca "EstoKit".
+  - Links de navegação para todas as seções.
+  - Indicador de perfil e acesso dinâmico (menu **Funcionários** exibido apenas para perfil `ADMIN`).
+  - Botão de alternância de modo claro/escuro.
+  - Painel do usuário logado e botão de encerramento de sessão (*Logout*).
+- **Footer:**
+  - Nome do autor: **Gabriel Assis**.
+  - Ano de criação: **2026**.
+  - Logotipo e nome da empresa: **EstoKit**.
+  - Status do sistema e selos de conformidade.
+
+---
+
+## 📄 Páginas e Módulos Implementados
+
+Todos os módulos utilizam estritamente os endpoints documentados em `docs/backend.md`:
+
+| Módulo | Rota | Endpoints Integrados | Permissão |
+| :--- | :--- | :--- | :--- |
+| **Login** | `/login` | `POST /auth/login` | Pública |
+| **Cadastro** | `/cadastro` | `POST /funcionarios/salvar` | Pública |
+| **Estoque** | `/estoque` | `GET /estoques`, `GET /produtos`, `PUT /estoques/adicionar/{idProduto}?quantidade={qtd}`, `PUT /estoques/subtrair/{idProduto}?quantidade={qtd}` | `PADRAO`, `ADMIN` |
+| **Produtos** | `/produtos` | `POST /produtos?quantidade={qtd}`, `GET /produtos`, `GET /produtos/nome/{nome}`, `GET /produtos/categoria/{categoriaNome}`, `PUT /produtos/{id}/inativar`, `PUT /produtos/{id}/ativar`, `DELETE /produtos/{id}` | `PADRAO`, `ADMIN` |
+| **Categorias** | `/categorias` | `POST /categorias`, `GET /categorias`, `GET /categorias/ativas`, `GET /categorias/inativas`, `GET /categorias/nome/{nome}`, `PUT /categorias/{id}`, `DELETE /categorias/{id}` | `PADRAO`, `ADMIN` |
+| **Fornecedores** | `/fornecedores` | `POST /fornecedores`, `GET /fornecedores`, `GET /fornecedores/nome/{nome}`, `PUT /fornecedores/{id}/nome?nome={novoNome}`, `PUT /fornecedores/{id}/inativar`, `PUT /fornecedores/{id}/ativar` | `PADRAO`, `ADMIN` |
+| **Compras & Movimentações** | `/compras` | `POST /compras`, `GET /compras`, `PUT /compras/{id}/cancelar?idFuncionario={idFuncionario}`, `GET /movimentacoes/produto/{id}`, `GET /movimentacoes/funcionario/{id}` | `PADRAO`, `ADMIN` |
+| **Funcionários** | `/funcionarios` | `POST /funcionarios/salvar`, `GET /funcionarios/todos`, `GET /funcionarios/buscanome/{nome}`, `PUT /funcionarios/atualizanome/{id}?nome={novoNome}`, `PUT /funcionarios/inativar/{id}`, `PUT /funcionarios/ativar/{id}` | **Exclusivo `ADMIN`** |
+
+---
+
+## 🔒 Segurança e Controle de Acesso (RBAC)
+
+- **Guarda de Rotas (`AuthGuard`):** Garante que usuários não autenticados sejam redirecionados para a tela de login.
+- **Guarda Administrativa (`AdminGuard`):** Protege a rota `/funcionarios`, bloqueando o acesso de colaboradores com perfil `PADRAO`.
+- **Interceptor HTTP (`authInterceptor`):** Injeta o cabeçalho `Authorization: Bearer <token>` automaticamente em todas as requisições autenticadas e intercepta erros `401/403` para renovação de sessão.
+
+---
+
+## 🚀 Executando o Projeto
+
+### Pré-requisitos
+- Node.js (versão 20+)
+- Backend Spring Boot em execução na porta `8080` (`http://localhost:8080`)
+
+### Instalação e Execução
 ```bash
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento
+npm start
+# ou
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Acesse no navegador: `http://localhost:4200` (ou na porta configurada).
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### Compilação para Produção
 ```bash
-ng generate component component-name
+npm run build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+### Testes Unitários
 ```bash
-ng generate --help
+npm test -- --watch=false
 ```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

@@ -1,0 +1,142 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon-badge">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+      </div>
+      <h1 class="auth-title">Criar Conta</h1>
+      <p class="auth-desc">Cadastre-se para acessar o sistema de estoque EstoKit</p>
+    </div>
+
+    <form [formGroup]="cadastroForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <!-- Nome Completo -->
+      <div class="form-group">
+        <label class="form-label" for="nome">
+          Nome Completo <span class="required">*</span>
+        </label>
+        <input 
+          id="nome" 
+          type="text" 
+          class="form-control" 
+          placeholder="Ex: Carlos Silva"
+          formControlName="nome"
+          [class.is-invalid]="isFieldInvalid('nome')">
+        @if (isFieldInvalid('nome')) {
+          <span class="form-error">Nome é obrigatório (mínimo 3 caracteres).</span>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label class="form-label" for="email">
+          E-mail Profissional <span class="required">*</span>
+        </label>
+        <input 
+          id="email" 
+          type="email" 
+          class="form-control" 
+          placeholder="carlos@estoque.com"
+          formControlName="email"
+          [class.is-invalid]="isFieldInvalid('email')">
+        @if (isFieldInvalid('email')) {
+          <span class="form-error">Informe um e-mail válido.</span>
+        }
+      </div>
+
+      <!-- Cargo & Matrícula (2 cols) -->
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label" for="cargo">
+            Cargo <span class="required">*</span>
+          </label>
+          <input 
+            id="cargo" 
+            type="text" 
+            class="form-control" 
+            placeholder="Ex: Almoxarife"
+            formControlName="cargo"
+            [class.is-invalid]="isFieldInvalid('cargo')">
+          @if (isFieldInvalid('cargo')) {
+            <span class="form-error">Cargo é obrigatório.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="matricula">
+            Matrícula <span class="required">*</span>
+          </label>
+          <input 
+            id="matricula" 
+            type="text" 
+            class="form-control" 
+            placeholder="Ex: MAT-2026-001"
+            formControlName="matricula"
+            [class.is-invalid]="isFieldInvalid('matricula')">
+          @if (isFieldInvalid('matricula')) {
+            <span class="form-error">Matrícula é obrigatória.</span>
+          }
+        </div>
+      </div>
+
+      <!-- Senha -->
+      <div class="form-group">
+        <label class="form-label" for="senha">
+          Senha de Acesso <span class="required">*</span>
+        </label>
+        <input 
+          id="senha" 
+          type="password" 
+          class="form-control" 
+          placeholder="••••••••"
+          formControlName="senha"
+          [class.is-invalid]="isFieldInvalid('senha')">
+        @if (isFieldInvalid('senha')) {
+          <span class="form-error">A senha deve ter no mínimo 6 caracteres.</span>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert-error-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block btn-lg" 
+        [disabled]="loading() || cadastroForm.invalid">
+        @if (loading()) {
+          <span class="spinner"></span>
+          <span>Cadastrando...</span>
+        } @else {
+          <span>Concluir Cadastro</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        }
+      </button>
+    </form>
+
+    <div class="auth-divider">
+      <span>ou</span>
+    </div>
+
+    <div class="auth-footer-action">
+      <p>Já possui uma conta registrada?</p>
+      <a routerLink="/login" class="btn btn-secondary btn-block">
+        Ir para Tela de Login
+      </a>
+    </div>
+  </div>
+</div>

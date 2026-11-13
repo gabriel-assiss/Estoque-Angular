@@ -1,0 +1,405 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <h1 class="page-title">Compras & Movimentações</h1>
+      <p class="page-subtitle">Aquisição de mercadorias, entrada no estoque e trilha de auditoria</p>
+    </div>
+    <div class="page-actions">
+      @if (abaAtiva() === 'COMPRAS') {
+        <button class="btn btn-primary" (click)="abrirModalNovaCompra()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>Nova Compra</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Main Tabs Switcher -->
+  <div class="tabs-header-bar">
+    <button 
+      class="tab-button" 
+      [class.active]="abaAtiva() === 'COMPRAS'" 
+      (click)="mudarAba('COMPRAS')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span>Ordens de Compra</span>
+    </button>
+
+    <button 
+      class="tab-button" 
+      [class.active]="abaAtiva() === 'MOVIMENTACOES'" 
+      (click)="mudarAba('MOVIMENTACOES')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      <span>Auditoria de Movimentações</span>
+    </button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ABA 1: ORDENS DE COMPRA                     -->
+  <!-- ========================================== -->
+  @if (abaAtiva() === 'COMPRAS') {
+    <!-- Stats Grid Compras -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total de Ordens</span>
+          <span class="stat-value">{{ totalElementsCompras() }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background-color: var(--color-success-bg); color: var(--color-success);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Concluídas</span>
+          <span class="stat-value">{{ concluidasCount() }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background-color: var(--color-danger-bg); color: var(--color-danger);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Canceladas / Estornadas</span>
+          <span class="stat-value">{{ canceladasCount() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Histórico de Compras</h2>
+        <button class="btn btn-secondary btn-sm" (click)="carregarCompras()" [disabled]="loadingCompras()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Recarregar</span>
+        </button>
+      </div>
+
+      <div class="card-body">
+        @if (loadingCompras()) {
+          <div class="empty-state">
+            <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px; border-color: var(--brown-300); border-top-color: var(--primary-accent);"></div>
+            <p>Carregando ordens de compra...</p>
+          </div>
+        } @else if (compras().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">🛍️</div>
+            <h3 class="empty-title">Nenhuma compra registrada</h3>
+            <p>Clique em "Nova Compra" para registrar pedidos a fornecedores e abastecer o estoque.</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table-modern">
+              <thead>
+                <tr>
+                  <th>Ordem</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Fornecedor</th>
+                  <th>Responsável</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (compra of compras(); track compra.id) {
+                  <tr>
+                    <td><strong>#{{ compra.id }}</strong></td>
+                    <td>{{ compra.dataCompra || 'Hoje' }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="compra.statusCompra === 'CONCLUIDA' ? 'badge-active' : 'badge-inactive'">
+                        {{ compra.statusCompra }}
+                      </span>
+                    </td>
+                    <td>{{ compra.fornecedorNome || (compra.fornecedorId ? 'Fornecedor #' + compra.fornecedorId : 'N/D') }}</td>
+                    <td>{{ compra.funcionarioNome || (compra.funcionarioId ? 'Funcionário #' + compra.funcionarioId : 'Sistema') }}</td>
+                    <td style="text-align: right;">
+                      @if (compra.statusCompra === 'CONCLUIDA') {
+                        <button 
+                          type="button" 
+                          class="btn btn-sm btn-danger-outline" 
+                          (click)="cancelarCompra(compra)"
+                          title="Cancelar Compra e Estornar Estoque">
+                          Cancelar Compra
+                        </button>
+                      } @else {
+                        <span class="badge badge-inactive">Cancelada</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Compras -->
+          <div class="pagination-footer">
+            <span>Página {{ paginaAtualCompras() + 1 }} de {{ totalPaginasCompras() }}</span>
+            <div class="pagination-controls">
+              <button 
+                class="btn btn-secondary btn-sm" 
+                [disabled]="paginaAtualCompras() === 0" 
+                (click)="mudarPaginaCompras(paginaAtualCompras() - 1)">
+                Anterior
+              </button>
+              <button 
+                class="btn btn-secondary btn-sm" 
+                [disabled]="paginaAtualCompras() >= totalPaginasCompras() - 1" 
+                (click)="mudarPaginaCompras(paginaAtualCompras() + 1)">
+                Próxima
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- ABA 2: MOVIMENTAÇÕES DE ESTOQUE             -->
+  <!-- ========================================== -->
+  @if (abaAtiva() === 'MOVIMENTACOES') {
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Auditoria de Entradas e Saídas</h2>
+      </div>
+
+      <div class="card-body">
+        <!-- Filter by Produto or Funcionario -->
+        <div class="filter-bar">
+          <div class="form-group" style="margin-bottom: 0; min-width: 220px;">
+            <select class="form-select" [(ngModel)]="filtroMovProdutoId" (change)="carregarMovimentacoes()">
+              <option [ngValue]="null">Todos os Produtos</option>
+              @for (prod of produtosDisponiveis(); track prod.id) {
+                <option [ngValue]="prod.id">{{ prod.nome }} (#{{ prod.id }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0; min-width: 200px;">
+            <input 
+              type="number" 
+              class="form-control" 
+              placeholder="Filtrar por ID Funcionário" 
+              [(ngModel)]="filtroMovFuncionarioId" 
+              (keyup.enter)="carregarMovimentacoes()">
+          </div>
+
+          <button class="btn btn-secondary" (click)="carregarMovimentacoes()">Filtrar</button>
+          @if (filtroMovProdutoId || filtroMovFuncionarioId) {
+            <button class="btn btn-outline" (click)="limparFiltrosMov()">Limpar</button>
+          }
+        </div>
+
+        @if (loadingMov()) {
+          <div class="empty-state">
+            <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px; border-color: var(--brown-300); border-top-color: var(--primary-accent);"></div>
+            <p>Consultando movimentações...</p>
+          </div>
+        } @else if (movimentacoes().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3 class="empty-title">Nenhuma movimentação localizada</h3>
+            <p>Selecione um produto ou registre operações de compra/ajuste para gerar logs de movimentação.</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table-modern">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Quantidade</th>
+                  <th>Produto</th>
+                  <th>Responsável</th>
+                  <th>Data / Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (mov of movimentacoes(); track mov.id) {
+                  <tr>
+                    <td>#{{ mov.id }}</td>
+                    <td>
+                      @switch (mov.tipo) {
+                        @case ('ENTRADA') {
+                          <span class="badge badge-active">&darr; ENTRADA</span>
+                        }
+                        @case ('SAIDA') {
+                          <span class="badge badge-inactive">&uarr; SAÍDA</span>
+                        }
+                        @case ('MUDANCA') {
+                          <span class="badge badge-info">&#x21c4; AJUSTE</span>
+                        }
+                        @default {
+                          <span class="badge badge-warning">{{ mov.tipo }}</span>
+                        }
+                      }
+                    </td>
+                    <td>
+                      <strong>{{ mov.quantidade }}</strong>
+                    </td>
+                    <td>{{ mov.produtoNome || (mov.produtoId ? 'Produto #' + mov.produtoId : 'Geral') }}</td>
+                    <td>{{ mov.funcionarioNome || (mov.funcionarioId ? 'Funcionário #' + mov.funcionarioId : 'Sistema') }}</td>
+                    <td>{{ mov.dataHora || 'Recentemente' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Modal Nova Compra -->
+@if (modalNovaCompraAberto()) {
+  <div class="modal-overlay" (click)="fecharModalNovaCompra()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Ordem de Compra</h3>
+        <button class="modal-close" (click)="fecharModalNovaCompra()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row-2">
+          <!-- Select Fornecedor -->
+          <div class="form-group">
+            <label class="form-label">Fornecedor <span class="required">*</span></label>
+            <select class="form-select" [(ngModel)]="novaCompraFornecedorId">
+              <option [ngValue]="null" disabled>Selecione o Fornecedor...</option>
+              @for (f of fornecedoresDisponiveis(); track f.id) {
+                <option [ngValue]="f.id">{{ f.nome }} ({{ f.cnpj }})</option>
+              }
+            </select>
+          </div>
+
+          <!-- Responsável -->
+          <div class="form-group">
+            <label class="form-label">Funcionário Solicitante</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              [value]="authService.currentUser()?.nome + ' (Você)'" 
+              disabled>
+          </div>
+        </div>
+
+        <!-- Adicionar Itens à Compra -->
+        <div class="items-builder-box">
+          <h4 class="builder-title">Itens do Pedido de Compra</h4>
+
+          <div class="item-input-row">
+            <div class="form-group" style="flex: 2; margin-bottom: 0;">
+              <label class="form-label">Produto</label>
+              <select class="form-select" [(ngModel)]="novoItemProdutoId">
+                <option [ngValue]="null" disabled>Selecione o produto...</option>
+                @for (prod of produtosDisponiveis(); track prod.id) {
+                  <option [ngValue]="prod.id">{{ prod.nome }} ({{ prod.unidadeMedida }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label class="form-label">Qtd.</label>
+              <input type="number" class="form-control" min="1" [(ngModel)]="novoItemQuantidade">
+            </div>
+
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label class="form-label">Preço Unit. (R$)</label>
+              <input type="number" step="0.01" class="form-control" min="0.01" [(ngModel)]="novoItemPreco">
+            </div>
+
+            <div style="align-self: flex-end;">
+              <button 
+                type="button" 
+                class="btn btn-secondary" 
+                [disabled]="!novoItemProdutoId || novoItemQuantidade <= 0 || novoItemPreco <= 0"
+                (click)="adicionarItem()">
+                + Adicionar
+              </button>
+            </div>
+          </div>
+
+          <!-- List of added items -->
+          @if (itensCompra().length > 0) {
+            <div class="table-responsive" style="margin-top: 1rem;">
+              <table class="table-modern">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Qtd.</th>
+                    <th>Preço Unit.</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of itensCompra(); track $index) {
+                    <tr>
+                      <td><strong>{{ item.produtoNome }}</strong></td>
+                      <td>{{ item.quantidade }}</td>
+                      <td>R$ {{ item.precoUnitario.toFixed(2) }}</td>
+                      <td><strong>R$ {{ (item.quantidade * item.precoUnitario).toFixed(2) }}</strong></td>
+                      <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-danger-outline" (click)="removerItem($index)">
+                          &times;
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" style="text-align: right; font-weight: 700;">Valor Total Estimado:</td>
+                    <td colspan="2"><strong style="color: var(--primary-accent); font-size: 1.1rem;">R$ {{ valorTotalCompra().toFixed(2) }}</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          } @else {
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
+              Nenhum item adicionado à ordem. Adicione pelo menos um item acima.
+            </p>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalNovaCompra()">Cancelar</button>
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          [disabled]="salvandoCompra() || !novaCompraFornecedorId || itensCompra().length === 0"
+          (click)="salvarCompra()">
+          {{ salvandoCompra() ? 'Registrando...' : 'Finalizar Compra' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

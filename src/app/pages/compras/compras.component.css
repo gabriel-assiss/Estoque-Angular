@@ -1,0 +1,87 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tabs-header-bar {
+  display: flex;
+  gap: 0.75rem;
+  border-bottom: 2px solid var(--border-subtle);
+  padding-bottom: 0.5rem;
+}
+
+.tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tab-button:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.tab-button.active {
+  color: var(--primary-accent);
+  background-color: var(--primary-accent-subtle);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.items-builder-box {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background-color: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.builder-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.item-input-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.pagination-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+}
