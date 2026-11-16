@@ -1,0 +1,275 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <h1 class="page-title">Gestão de Fornecedores</h1>
+      <p class="page-subtitle">Cadastre parceiros comerciais, distribuidores e controle a situação cadastral</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" (click)="abrirModalNovo()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Novo Fornecedor</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="3" width="15" height="13"></rect>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Total de Parceiros</span>
+        <span class="stat-value">{{ totalElements() }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background-color: var(--color-success-bg); color: var(--color-success);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Fornecedores Ativos</span>
+        <span class="stat-value">{{ ativosCount() }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background-color: var(--color-danger-bg); color: var(--color-danger);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Inativos</span>
+        <span class="stat-value">{{ inativosCount() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Parceiros Cadastrados</h2>
+      <button class="btn btn-secondary btn-sm" (click)="carregarFornecedores()" [disabled]="loading()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Atualizar</span>
+      </button>
+    </div>
+
+    <div class="card-body">
+      <!-- Search Bar -->
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar fornecedor por razão social ou nome fantasia..." 
+            [(ngModel)]="buscaNome"
+            (keyup.enter)="executarBuscaNome()">
+        </div>
+        <button class="btn btn-secondary" (click)="executarBuscaNome()">Buscar</button>
+        @if (buscaAtiva()) {
+          <button class="btn btn-outline" (click)="limparBusca()">Limpar</button>
+        }
+      </div>
+
+      <!-- Loading or Table -->
+      @if (loading()) {
+        <div class="empty-state">
+          <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px; border-color: var(--brown-300); border-top-color: var(--primary-accent);"></div>
+          <p>Carregando fornecedores...</p>
+        </div>
+      } @else if (fornecedores().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🏢</div>
+          <h3 class="empty-title">Nenhum fornecedor cadastrado</h3>
+          <p>Cadastre fornecedores para habilitar a geração de ordens de compra.</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Razão Social / Nome</th>
+                <th>CNPJ</th>
+                <th>Status</th>
+                <th style="text-align: right;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (forn of fornecedores(); track forn.id) {
+                <tr>
+                  <td>#{{ forn.id }}</td>
+                  <td>
+                    <strong>{{ forn.nome }}</strong>
+                  </td>
+                  <td>
+                    <code>{{ forn.cnpj }}</code>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="forn.statusFornecedor === 'ATIVO' ? 'badge-active' : 'badge-inactive'">
+                      {{ forn.statusFornecedor || 'ATIVO' }}
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <div class="action-buttons-group">
+                      <!-- Atualizar Nome -->
+                      <button 
+                        type="button" 
+                        class="btn btn-sm btn-secondary" 
+                        (click)="abrirModalEditarNome(forn)"
+                        title="Editar Nome">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        <span>Editar</span>
+                      </button>
+
+                      <!-- Inativar / Ativar -->
+                      @if (forn.statusFornecedor === 'ATIVO') {
+                        <button 
+                          type="button" 
+                          class="btn btn-sm btn-danger-outline" 
+                          (click)="inativarFornecedor(forn)"
+                          title="Inativar Fornecedor">
+                          Inativar
+                        </button>
+                      } @else {
+                        <button 
+                          type="button" 
+                          class="btn btn-sm btn-outline" 
+                          (click)="ativarFornecedor(forn)"
+                          title="Ativar Fornecedor">
+                          Ativar
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-footer">
+          <span>Página {{ paginaAtual() + 1 }} de {{ totalPaginas() }} ({{ totalElements() }} fornecedores)</span>
+          <div class="pagination-controls">
+            <button 
+              class="btn btn-secondary btn-sm" 
+              [disabled]="paginaAtual() === 0" 
+              (click)="mudarPagina(paginaAtual() - 1)">
+              Anterior
+            </button>
+            <button 
+              class="btn btn-secondary btn-sm" 
+              [disabled]="paginaAtual() >= totalPaginas() - 1" 
+              (click)="mudarPagina(paginaAtual() + 1)">
+              Próxima
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Fornecedor -->
+@if (modalNovoAberto()) {
+  <div class="modal-overlay" (click)="fecharModalNovo()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Cadastrar Novo Fornecedor</h3>
+        <button class="modal-close" (click)="fecharModalNovo()">&times;</button>
+      </div>
+      <form [formGroup]="novoFornecedorForm" (ngSubmit)="salvarNovoFornecedor()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Razão Social / Nome Fantasia <span class="required">*</span></label>
+            <input 
+              type="text" 
+              class="form-control" 
+              formControlName="nome" 
+              placeholder="Ex: Distribuidora Nacional LTDA">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">CNPJ <span class="required">*</span></label>
+            <input 
+              type="text" 
+              class="form-control" 
+              formControlName="cnpj" 
+              placeholder="Ex: 12.345.678/0001-90">
+            <span class="form-hint">O CNPJ deve ser único no sistema.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="fecharModalNovo()">Cancelar</button>
+          <button 
+            type="submit" 
+            class="btn btn-primary" 
+            [disabled]="salvando() || novoFornecedorForm.invalid">
+            {{ salvando() ? 'Salvando...' : 'Cadastrar Fornecedor' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Editar Nome -->
+@if (modalEditarNomeAberto()) {
+  <div class="modal-overlay" (click)="fecharModalEditarNome()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Atualizar Nome do Fornecedor</h3>
+        <button class="modal-close" (click)="fecharModalEditarNome()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+          CNPJ: <strong>{{ fornecedorSelecionado()?.cnpj }}</strong>
+        </p>
+        <div class="form-group">
+          <label class="form-label">Novo Nome / Razão Social <span class="required">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="novoNomeInput" placeholder="Informe o novo nome">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalEditarNome()">Cancelar</button>
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          [disabled]="salvando() || !novoNomeInput.trim()"
+          (click)="confirmarAtualizacaoNome()">
+          {{ salvando() ? 'Salvando...' : 'Salvar Alteração' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
